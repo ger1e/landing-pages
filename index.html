@@ -11,7 +11,7 @@
 <meta property="og:title" content="ム乇 尺 1 乇 // ger1e">
 <meta property="og:description" content="Behavior. Evidence. Signal.">
 <meta name="twitter:card" content="summary_large_image">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'self'; script-src 'self'; img-src 'self' data: blob:; connect-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'self'; script-src 'self'; img-src 'self' data:; media-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
 <link rel="icon" type="image/svg+xml" href="assets/radar.svg">
 <title>ム乇 尺 1 乇 // ger1e</title>
 <link rel="stylesheet" href="assets/core.css">
@@ -25,7 +25,7 @@
 <div class="shell">
   <nav class="nav" aria-label="Primary">
     <div class="brand"><i class="dot" aria-hidden="true"></i><span>GER1E // ONLINE</span></div>
-    <div class="navright"><a href="https://github.com/ger1e" rel="me">GITHUB</a><a href="https://open.spotify.com/track/2kPmvDatzh3OjcCiBPsurw" target="_blank" rel="noopener noreferrer">AUDIO</a></div>
+    <div class="navright"><a href="https://github.com/ger1e" rel="me">GITHUB</a></div>
   </nav>
   <main class="hero">
     <section class="hero-card" id="hero-card" aria-labelledby="hero-title">
@@ -36,15 +36,15 @@
         <div class="role">HUNT / <b>CTI</b> / DETECT</div>
         <div class="copyline">Behavior. Evidence. Signal.</div>
         <div class="actions"><a class="btn" href="https://github.com/ger1e" rel="me">ACCESS GIT</a><span class="microstate">THREAT HUNTING // INTELLIGENCE // DETECTION</span></div>
-        <a class="sound-module" href="https://open.spotify.com/track/2kPmvDatzh3OjcCiBPsurw" target="_blank" rel="noopener noreferrer" aria-label="Open selected soundtrack on Spotify">
-          <span class="sound-play">▶</span><span class="sound-meta"><b>NOW PLAYING // DARK SIGNAL</b><small>selected soundtrack // open track</small></span><span class="sound-bars" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></span>
-        </a>
+        <button class="sound-module" id="audioToggle" type="button" aria-pressed="false" aria-label="Toggle local cyber audio layer">
+          <span class="sound-play" aria-hidden="true">◢</span><span class="sound-meta"><b id="audioState" aria-live="polite">AUDIO // ARM</b><small>local ambient + interface cues</small></span><span class="sound-bars" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></span>
+        </button>
         <div class="flow"><b>&gt;</b> HUNT <b>&gt;</b> VERIFY <b>&gt;</b> ENRICH <b>&gt;</b> EXPLAIN</div>
       </div>
       <figure class="cat-card" aria-label="Rotund cyber operator at workstation">
-        <img id="catHero" width="3072" height="4096" loading="eager" decoding="async" alt="Very round fluffy tabby cat at a cyber workstation">
+        <img id="catHero" src="assets/rotund-operator.avif" width="3072" height="4096" loading="eager" decoding="async" fetchpriority="high" alt="Very round fluffy tabby cat at a cyber workstation">
         <div class="cat-light" aria-hidden="true"></div><div class="cat-scan" aria-hidden="true"></div><div class="cat-vignette" aria-hidden="true"></div>
-        <span class="signal">MONITOR // CAST</span><figcaption class="cat-label"><b>ROTUND_OPERATOR</b> // 4K</figcaption>
+        <span class="signal">MONITOR // CAST</span><figcaption class="cat-label"><b>ROTUND_OPERATOR</b> // LIVE</figcaption>
       </figure>
     </section>
   </main>
