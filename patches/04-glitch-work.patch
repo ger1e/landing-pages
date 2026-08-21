@@ -1,0 +1,33 @@
+--- a/index.html
++++ b/index.html
+@@ -462,14 +467,14 @@
+ 
+ const glitchCleanup={sync:0,portrait:0,wordmark:0,title:0,clock:0,ibm:0,work:0};
+ function retriggerClass(el,cls,key,dur){clearTimeout(glitchCleanup[key]);el.classList.remove(cls);void el.offsetWidth;el.classList.add(cls);glitchCleanup[key]=setTimeout(()=>{el.classList.remove(cls);glitchCleanup[key]=0},dur)}
+-function triggerSyncLines(ms=520){if(reduceMotion.matches||!syncLines)return;retriggerClass(syncLines,'glitching','sync',ms+80)}
+-function triggerPortraitGlitch(){if(reduceMotion.matches)return;triggerSyncLines(540);glitchAudio.play('portrait');retriggerClass(portrait,'glitching','portrait',620)}
+-function triggerWordmarkGlitch(){if(reduceMotion.matches)return;triggerSyncLines(620);glitchAudio.play('wordmark');retriggerClass(wordmark,'glitching','wordmark',900)}
+-function triggerTitleGlitch(){if(reduceMotion.matches)return;triggerSyncLines(340);glitchAudio.play('title');retriggerClass(termTitle,'glitching','title',390)}
++function triggerSyncLines(ms=520){if(!syncLines)return;retriggerClass(syncLines,'glitching','sync',ms+80)}
++function triggerPortraitGlitch(){triggerSyncLines(540);glitchAudio.play('portrait');retriggerClass(portrait,'glitching','portrait',620)}
++function triggerWordmarkGlitch(){triggerSyncLines(620);glitchAudio.play('wordmark');retriggerClass(wordmark,'glitching','wordmark',900)}
++function triggerTitleGlitch(){triggerSyncLines(340);glitchAudio.play('title');retriggerClass(termTitle,'glitching','title',390)}
+ function triggerClockGlitch(){triggerSyncLines(300);glitchAudio.play('clock');retriggerClass(casClock,'lcd-glitch','clock',300)}
+-function triggerIbmTick(){if(reduceMotion.matches)return;glitchAudio.play('ibm');clearTimeout(glitchCleanup.ibm);const old=ibmLogo.style.filter,oldT=ibmLogo.style.transform,oldO=ibmLogo.style.opacity;ibmLogo.style.filter='brightness(2.1) contrast(1.28)';ibmLogo.style.transform='translateX(1px)';ibmLogo.style.opacity='.72';glitchCleanup.ibm=setTimeout(()=>{ibmLogo.style.filter=old;ibmLogo.style.transform=oldT;ibmLogo.style.opacity=oldO;glitchCleanup.ibm=0},110)}
+-function triggerCursorFault(){if(reduceMotion.matches)return;cursor.classList.remove('snap');void cursor.offsetWidth;cursor.classList.add('snap');glitchAudio.play('cursor')}
+-function triggerWorkTear(){if(reduceMotion.matches)return;triggerSyncLines(680);glitchAudio.play('work');retriggerClass(workstation,'workstation-tear','work',460)}
++function triggerIbmTick(){glitchAudio.play('ibm');clearTimeout(glitchCleanup.ibm);const old=ibmLogo.style.filter,oldT=ibmLogo.style.transform,oldO=ibmLogo.style.opacity;ibmLogo.style.filter='brightness(2.1) contrast(1.28)';ibmLogo.style.transform='translateX(1px)';ibmLogo.style.opacity='.72';glitchCleanup.ibm=setTimeout(()=>{ibmLogo.style.filter=old;ibmLogo.style.transform=oldT;ibmLogo.style.opacity=oldO;glitchCleanup.ibm=0},110)}
++function triggerCursorFault(){cursor.classList.remove('snap');void cursor.offsetWidth;cursor.classList.add('snap');glitchAudio.play('cursor')}
++function triggerWorkTear(){triggerSyncLines(680);glitchAudio.play('work');retriggerClass(workstation,'workstation-tear','work',460)}
+ function rnd(a,b){return a+Math.random()*(b-a)}
+ const Scheduler={timer:0,paused:false,readyAt:0,next:{},majorUntil:0,lastMajor:0,
+  start(){this.readyAt=performance.now();const n=this.readyAt;this.next={portraitProof:n+1400,portrait:n+rnd(24000,36000),wordmark:n+rnd(3500,6500),matrix:n+rnd(1500,3000),title:n+rnd(3500,6500),clock:n+rnd(5000,9000),ibm:n+rnd(18000,30000),work:n+rnd(12000,22000)};this.queue()},
+@@ -501,7 +506,7 @@
+  if(lc==='help'){out('Available commands:','help       whoami      location      work','contact    socials     certs         cv','stack      about       love          cat','root       sudo        su            sudo su','pwd        hostname    uname -a      uptime','ls         ls -la      cat /etc/issue','echo $SHELL  echo $USER  echo $HOME','id         history     date          clear','exit       reboot      shutdown -h now','rm -rf /   man gergo   finger gergo','fortune    coffee      hunt          ioc','kql        ping noncsi chmod +x','chmod +x gergoilly.hu','','Matrix controls: matrix | matrix status | matrix normal | matrix dense | matrix off','Theme controls: theme | theme cobalt | theme black','Audio: music | music status | music on | music off | sound | sound status | sound on | sound off');}
+  else if(lc==='whoami'){out('GERGŐ ILLY','CYBERSECURITY CONSULTANT / CYBER THREAT HUNTER','Budapest, Hungary')}
+  else if(lc==='location'){out('Budapest, Hungary')}
+- else if(lc==='work'){out('*****************************************************','*****************************************************','*****************************************************','███████████  ████████████      ████████      ████████','███████████  ███████████████   █████████    █████████','   █████        ████   █████     ████████  ████████','   █████        ███████████      ████  ███ ███ ████','   █████        ████████████     ████  ███████ ████','   █████        ████   █████     ████   █████  ████','███████████  ██████████████    ██████    ███   ██████','███████████  ████████████      ██████     █    ██████','*****************************************************','*  This system is for the use of authorized users   *','*  only. Usage of  this system may be monitored     *','*  and recorded                                     *','*****************************************************')}
++ else if(lc==='work'){out('IBM Consulting FutureNow Center','Budapest, Hungary')}
+  else if(lc==='contact'){htmlLine(`Email: <a href="mailto:mail@gergoilly.hu">mail@gergoilly.hu</a>`);htmlLine(`Phone: <a href="tel:+36307320566">+36 30 732 0566</a>`)}
+  else if(lc==='socials'){htmlLine(link('LinkedIn','https://linkedin.com/in/gergoilly'));htmlLine(link('Facebook','https://facebook.com/gergoilly'));htmlLine(link('Instagram','https://instagram.com/gergoilly'));htmlLine(link('Credly','https://credly.com/users/gergoilly'));htmlLine(link('Buy Me a Coffee','https://buymeacoffee.com/gergoilly'))}
+  else if(lc==='certs'){out('[ CySA+ ]  [ eCTHP ]  [ SAL2 ]','CompTIA CySA+','INE Certified Threat Hunting Professional','TryHackMe Security Analyst Level 2')}
