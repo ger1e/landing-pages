@@ -1,0 +1,68 @@
+--- a/index.html
++++ b/index.html
+@@ -316,10 +322,9 @@
+   back:null,front:null,boost:0,surge:0,raf:0,last:0,frame:0,
+   glyphs:'0123456789ABCDEFabcdefアイウエオカキクケコサシスセソタチツテト[]{}<>/\\#*+|:;'.split(''),
+   init(){
+-    // Wallpaper-Engine-style dual-depth digital rain. Preserve the canonical speed values,
+-    // but render them as dense, coherent vertical streams rather than scattered glyph noise.
+-    this.back=this.make($('#matrixBack'),7.8,4.40,.70,false,.88);
+-    this.front=this.make($('#matrixFront'),9.2,8.60,.82,true,.82);
++    // Dense dual-depth rain: half-speed motion, higher column density, longer streams.
++    this.back=this.make($('#matrixBack'),7.8,2.20,.78,false,.72);
++    this.front=this.make($('#matrixFront'),9.2,4.30,.90,true,.68);
+     this.resize();this.last=performance.now();this.loop(this.last)
+   },
+   make(canvas,font,speed,alpha,isFront,spacing){return {
+@@ -328,9 +333,9 @@
+   }},
+   mkStream(l,i,rows,randomHead=true){
+     const dense=matrixMode==='dense';
+-    const minLen=l.isFront?72:104,maxLen=l.isFront?168:228;
++    const minLen=l.isFront?92:128,maxLen=l.isFront?210:292;
+     return {
+-      active: dense ? true : Math.random()<(l.isFront?.985:.97),
++      active: dense ? true : Math.random()<(l.isFront?.995:.99),
+       x:i*l.stride+(Math.random()-.5)*(l.isFront?.75:.55),
+       head: randomHead ? Math.random()*(rows+maxLen) : -(3+Math.random()*maxLen*.7),
+       speed:.68+Math.random()*.44,
+@@ -365,16 +370,16 @@
+     };
+     if(mobile){
+       // Tight head and torso fields leave live rain down both sides of the portrait.
+-      eraseEllipse(w*.50,h*.225,w*.405,h*.255,4,6);
+-      eraseEllipse(w*.50,h*.505,w*.455,h*.245,4,7);
++      eraseEllipse(w*.50,h*.225,w*.305,h*.235,3,5);
++      eraseEllipse(w*.50,h*.505,w*.385,h*.225,3,6);
+     }else{
+-      eraseEllipse(w*.82,h*.315,w*.160,h*.282,6,6);
+-      eraseEllipse(w*.82,h*.745,w*.182,h*.34,6,7);
++      eraseEllipse(w*.82,h*.315,w*.125,h*.255,4,5);
++      eraseEllipse(w*.82,h*.745,w*.150,h*.315,4,6);
+     }
+   },
+   glyphFor(s,k){
+     // Slow glyph mutation relative to travel speed so columns read as coherent streams.
+-    return this.glyphs[(s.phase+k*5+((this.frame>>2)%this.glyphs.length))%this.glyphs.length]
++    return this.glyphs[(s.phase+k*5+((this.frame>>3)%this.glyphs.length))%this.glyphs.length]
+   },
+   draw(l,dt,isFront){
+     const ctx=l.ctx,w=l.canvas.clientWidth,h=l.canvas.clientHeight;
+@@ -395,7 +400,7 @@
+         continue
+       }
+ 
+-      // FINAL QA: Wallpaper-Engine-density rain, accelerated motion, long coherent streams, hard face exclusion.
++      // FINAL QA: dense half-speed rain, long coherent streams, tight portrait exclusion.
+       s.head+=baseSpeed*s.speed*dt/16.67;
+       const head=Math.floor(s.head);
+       const frac=s.head-head;
+@@ -454,7 +459,7 @@
+   },
+   resume(){if(!this.raf){this.last=performance.now();this.raf=requestAnimationFrame(x=>this.loop(x))}},
+   setMode(m){matrixMode=m;workstation.classList.toggle('matrix-off',m==='off');if(m!=='off')this.resize()},
+-  surgeNow(){if(reduceMotion.matches||matrixMode==='off')return;this.surge=1.15;triggerSyncLines(520);glitchAudio.play('matrix');setTimeout(()=>this.surge=0,380)}
++  surgeNow(){if(matrixMode==='off')return;this.surge=1.15;triggerSyncLines(520);glitchAudio.play('matrix');setTimeout(()=>this.surge=0,380)}
+ };
+ matrixEngine.init();
+ 
