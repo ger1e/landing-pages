@@ -1,7 +1,5 @@
 # landing-pages
 
-Active cyberpunk landing page for `ger1e`.
+Experimental cyberpunk landing surface. This repository is intentionally separate from the personal-site codebase.
 
-Production is deployed from `main` to Vercel.
-
-Current build uses local static assets for the hero, interface effects, and opt-in audio cues.
+Static HTML/CSS/JS. No framework, no remote dependencies, no analytics.
