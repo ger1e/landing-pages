@@ -24,11 +24,20 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          test "$(find payload-cat -maxdepth 1 -type f -name 'chunk-*.b64' | wc -l)" -eq 8
-          cat payload-cat/chunk-{00..07}.b64 | tr -d '\r\n' | base64 -d | gzip -dc > index.html
-          actual="$(sha256sum index.html | awk '{print $1}')"
-          echo "html=$actual"
-          test "$actual" = 'f877e7c8c87207b293a33bf538fea060ab3d05ace4b3fd0ff8896d96ed36ccc2'
+          mapfile -t chunks < <(find payload-cat -maxdepth 1 -type f -name 'chunk-*.b64' | sort)
+          test "${#chunks[@]}" -eq 13
+          cat "${chunks[@]}" | tr -d '\r\n' > /tmp/site.b64
+          b64_sha="$(sha256sum /tmp/site.b64 | awk '{print $1}')"
+          echo "payload=$b64_sha"
+          test "$b64_sha" = '97ccf61132e2bd538a101b5b1c9953f71b30a26db825a735f6da5a25a3194db9'
+          base64 -d /tmp/site.b64 > /tmp/site.html.gz
+          gzip_sha="$(sha256sum /tmp/site.html.gz | awk '{print $1}')"
+          echo "gzip=$gzip_sha"
+          test "$gzip_sha" = '4b4c3c845786965a642df74317746e21f46a2a18073a966ae0e4fdc2c4348c49'
+          gzip -dc /tmp/site.html.gz > index.html
+          html_sha="$(sha256sum index.html | awk '{print $1}')"
+          echo "html=$html_sha"
+          test "$html_sha" = 'f877e7c8c87207b293a33bf538fea060ab3d05ace4b3fd0ff8896d96ed36ccc2'
 
       - name: Static QA
         shell: bash
@@ -41,6 +50,7 @@ jobs:
           assert p.stat().st_size == 152199
           assert 'FINAL-BOUNDED-HARDENING-2026-08-21-CAT-ASSET' in s
           assert 'IBM Consulting FutureNow Center' in s
+          assert 'Budapest, Hungary' in s
           assert 'This system is for the use of authorized users' not in s
           assert "this.back=this.make($('#matrixBack'),7.8,2.20,.78,false,.72)" in s
           assert "this.front=this.make($('#matrixFront'),9.2,4.30,.90,true,.68)" in s
