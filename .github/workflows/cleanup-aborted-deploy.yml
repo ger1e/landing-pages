@@ -1,0 +1,82 @@
+name: Cleanup aborted deployment scaffolding
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/cleanup-aborted-deploy.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Materialize verified site payload
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          import base64, gzip, hashlib, re
+          wf = Path('.github/workflows/publish-inline-index.yml').read_text(encoding='utf-8')
+          m = re.search(r"data = '''([A-Za-z0-9+/=]+)'''", wf, re.S)
+          if not m:
+              raise SystemExit('embedded site payload not found')
+          html = gzip.decompress(base64.b64decode(m.group(1)))
+          sha = hashlib.sha256(html).hexdigest()
+          print('materialized_sha256=' + sha)
+          if sha != 'f877e7c8c87207b293a33bf538fea060ab3d05ace4b3fd0ff8896d96ed36ccc2':
+              raise SystemExit('unexpected site payload hash')
+          text = html.decode('utf-8')
+          required = [
+              'FINAL-BOUNDED-HARDENING-2026-08-21-CAT-ASSET',
+              'IBM Consulting FutureNow Center',
+              "this.back=this.make($('#matrixBack'),7.8,2.20,.78,false,.72)",
+              "this.front=this.make($('#matrixFront'),9.2,4.30,.90,true,.68)",
+              'spotifyController.resume?.();spotifyController.play?.()',
+              '#workstation.mobile-keyboard .terminal{transform:translate3d',
+              'assets/cat4k/00.txt',
+              'assets/cat4k/01-03.txt',
+              'assets/cat4k/04-07.txt',
+          ]
+          missing = [x for x in required if x not in text]
+          if missing:
+              raise SystemExit('missing required markers: ' + repr(missing))
+          if 'This system is for the use of authorized users' in text:
+              raise SystemExit('obsolete ASCII banner still present')
+          Path('index.html').write_bytes(html)
+          PY
+          node --check <(python3 - <<'PY'
+          from pathlib import Path
+          import re
+          s=Path('index.html').read_text(encoding='utf-8')
+          scripts=re.findall(r'<script(?:\s[^>]*)?>(.*?)</script>',s,flags=re.S|re.I)
+          print(scripts[-1])
+          PY
+          )
+
+      - name: Remove temporary deployment debris
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf diagnostics patches payload-cat
+          rm -f publish-final.request inspect-live.request
+          rm -rf .github
+          git add -A
+          git diff --cached --check
+
+      - name: Commit clean repository
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m 'chore: clean aborted deployment scaffolding'
+          git push
