@@ -1,0 +1,52 @@
+sha256=773e59c1af28f55d03234f7e6663789465fb257a0ca4eececf5d3ee83cdeda63
+bytes=6181
+build_meta=NONE
+title=Kezdőlap
+
+===== mobile-keyboard =====
+NOT_FOUND
+
+===== visualViewport =====
+NOT_FOUND
+
+===== function beep =====
+NOT_FOUND
+
+===== triggerPortraitGlitch =====
+NOT_FOUND
+
+===== triggerWordmarkGlitch =====
+NOT_FOUND
+
+===== this.back=this.make =====
+NOT_FOUND
+
+===== this.front=this.make =====
+NOT_FOUND
+
+===== matrixEngine =====
+NOT_FOUND
+
+===== else if(lc==='work') =====
+NOT_FOUND
+
+===== spotifyPlay =====
+NOT_FOUND
+
+===== onSpotifyIframeApiReady =====
+NOT_FOUND
+
+===== prefers-reduced-motion =====
+NOT_FOUND
+
+===== beforeinput =====
+NOT_FOUND
+
+===== keydown =====
+NOT_FOUND
+
+===== IBM Consulting FutureNow Center =====
+NOT_FOUND
+
+===== This system is for the use of authorized users =====
+NOT_FOUND
