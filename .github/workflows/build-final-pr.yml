@@ -1,8 +1,8 @@
 name: Build final terminal site
 
 on:
-  pull_request:
-    branches: [main]
+  push:
+    branches: [publish-final-terminal]
     paths:
       - 'payload-cat/**'
       - '.github/workflows/build-final-pr.yml'
@@ -14,10 +14,10 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout PR head
+      - name: Checkout final branch
         uses: actions/checkout@v6
         with:
-          ref: ${{ github.event.pull_request.head.ref }}
+          ref: publish-final-terminal
           fetch-depth: 0
 
       - name: Reconstruct verified final site
@@ -65,7 +65,7 @@ jobs:
           node --check /tmp/site.js
           git diff --check
 
-      - name: Commit generated site to PR branch
+      - name: Commit generated site
         shell: bash
         run: |
           set -euo pipefail
@@ -75,4 +75,4 @@ jobs:
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add index.html CNAME .nojekyll
           git commit -m 'Generate final QA gergoilly.hu' || exit 0
-          git push origin HEAD:${{ github.event.pull_request.head.ref }}
+          git push origin HEAD:publish-final-terminal
