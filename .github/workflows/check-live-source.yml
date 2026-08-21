@@ -1,0 +1,32 @@
+name: Check live source
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/check-live-source.yml']
+permissions:
+  contents: write
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - shell: bash
+        run: |
+          set -u
+          mkdir -p diagnostics
+          if curl --fail --location --silent --show-error --retry 3 https://gergoilly.hu/ -o /tmp/live.html; then
+            {
+              echo "sha256=$(sha256sum /tmp/live.html | awk '{print $1}')"
+              echo "bytes=$(wc -c < /tmp/live.html)"
+              grep -o '<title>[^<]*</title>' /tmp/live.html | head -1 || true
+              grep -o 'name="build"[^>]*' /tmp/live.html | head -1 || true
+            } > diagnostics/live-source.txt
+          else
+            echo 'fetch_failed=true' > diagnostics/live-source.txt
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add diagnostics/live-source.txt
+          git commit -m 'Record live source diagnostic' || exit 0
+          git pull --rebase origin main
+          git push origin HEAD:main
