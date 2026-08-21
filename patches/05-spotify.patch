@@ -1,0 +1,31 @@
+--- a/index.html
++++ b/index.html
+@@ -562,22 +567,16 @@
+ input.addEventListener('beforeinput',e=>{if(!coarse.matches||!bootReady)return;const t=e.inputType||'';if(t.startsWith('delete'))beep('back');else if(t==='insertLineBreak'||t==='insertParagraph')beep('enter');else if(t.startsWith('insert'))beep('key')});
+ $('#inputRow').addEventListener('pointerdown',()=>{if(!bootReady)return;unlockAudio();input.focus({preventScroll:true})});
+ 
+-function spotifyPlay(){try{if(spotifyController){spotifyController.resume?.();spotifyController.play?.();spotifyState='requested'}else spotifyState='blocked'}catch(e){spotifyState='blocked'}}
+-function spotifyPause(){try{spotifyController?.pause?.();spotifyState='paused'}catch(e){spotifyState='paused'}}
+-window.onSpotifyIframeApiReady=(IFrameAPI)=>{try{const el=$('#spotifyEmbed');IFrameAPI.createController(el,{uri:'spotify:track:2O0z8cMBuPnaHkicodw8K5',width:1,height:1},c=>{spotifyController=c;spotifyState='ready';try{c.addListener?.('playback_update',e=>{if(e?.data?.isPaused===false)spotifyState='playing';else if(e?.data?.isPaused===true)spotifyState='paused'})}catch(e){}spotifyPlay()})}catch(e){spotifyState='blocked'}};
++function spotifyPlay(){spotifyWantPlay=true;try{if(!spotifyController){spotifyState='waiting for player';return false}spotifyController.resume?.();spotifyController.play?.();spotifyState='requested';return true}catch(e){spotifyState='blocked';return false}}
++function spotifyPause(){spotifyWantPlay=false;try{spotifyController?.pause?.();spotifyState='paused'}catch(e){spotifyState='paused'}}
++window.onSpotifyIframeApiReady=(IFrameAPI)=>{try{const el=$('#spotifyEmbed');IFrameAPI.createController(el,{uri:'spotify:track:2O0z8cMBuPnaHkicodw8K5',width:320,height:80},c=>{spotifyController=c;spotifyState='ready';try{c.addListener?.('playback_update',e=>{if(e?.data?.isPaused===false)spotifyState='playing';else if(e?.data?.isPaused===true)spotifyState=spotifyWantPlay?'ready':'paused'})}catch(e){}})}catch(e){spotifyState='blocked'}};
+ const spotifyScript=document.createElement('script');spotifyScript.src='https://open.spotify.com/embed/iframe-api/v1';spotifyScript.async=true;spotifyScript.onerror=()=>spotifyState='blocked';document.head.appendChild(spotifyScript);
+-function spotifyGestureEligible(e){
+-  const t=e.target;
+-  if(document.activeElement===input)return false;
+-  if(t===input||t?.closest?.('#inputRow')||t?.closest?.('.terminal'))return false;
+-  if(workstation.classList.contains('mobile-keyboard'))return false;
+-  return true;
+-}
+-['pointerdown','keydown','touchend'].forEach(ev=>addEventListener(ev,e=>{unlockAudio();if(spotifyGestureEligible(e)&&spotifyController&&spotifyState!=='playing')spotifyPlay()},{passive:true}));
++function spotifyGestureStart(){unlockAudio();if(spotifyWantPlay&&spotifyController&&spotifyState!=='playing')spotifyPlay()}
++['pointerdown','keydown','touchend'].forEach(ev=>addEventListener(ev,spotifyGestureStart,{passive:true}));
+ 
+ const cc=$('#customCursor');addEventListener('pointermove',e=>{if(!coarse.matches){cc.style.opacity='1';cc.style.transform=`translate(${e.clientX-2}px,${e.clientY-1}px)`}},{passive:true});addEventListener('pointerleave',()=>cc.style.opacity='0',{passive:true});
+ 
+-window.__Scheduler=Scheduler;window.__glitchAudio=glitchAudio;window.__triggerPortraitGlitch=triggerPortraitGlitch;window.__triggerWordmarkGlitch=triggerWordmarkGlitch;window.__triggerTitleGlitch=triggerTitleGlitch;window.__triggerClockGlitch=triggerClockGlitch;window.__triggerIbmTick=triggerIbmTick;window.__triggerCursorFault=triggerCursorFault;window.__triggerSyncLines=triggerSyncLines;window.__triggerWorkTear=triggerWorkTear;window.__matrixEngine=matrixEngine;window.__siteReady=false;
++window.__BUILD='FINAL-BOUNDED-HARDENING-2026-08-21';window.__qaState=()=>({mobileStableHeight,mobileStableWidth,mobileKeyboardOpen,matrixMode,matrixBackSpeed:matrixEngine.back?.speed,matrixFrontSpeed:matrixEngine.front?.speed,matrixBackCols:matrixEngine.back?.cols,matrixFrontCols:matrixEngine.front?.cols,spotifyState,spotifyWantPlay,audioUnlocked});window.__Scheduler=Scheduler;window.__glitchAudio=glitchAudio;window.__triggerPortraitGlitch=triggerPortraitGlitch;window.__triggerWordmarkGlitch=triggerWordmarkGlitch;window.__triggerTitleGlitch=triggerTitleGlitch;window.__triggerClockGlitch=triggerClockGlitch;window.__triggerIbmTick=triggerIbmTick;window.__triggerCursorFault=triggerCursorFault;window.__triggerSyncLines=triggerSyncLines;window.__triggerWorkTear=triggerWorkTear;window.__matrixEngine=matrixEngine;window.__siteReady=false;
+ boot().catch(e=>{console.error(e);body.innerHTML='';line('boot recovery: terminal initialized','ok');line("Type 'help' to list available commands.",'muted');bootReady=true;terminal.classList.add('ready');window.__siteReady=true;Scheduler.start()});
+ })();
+ </script>
