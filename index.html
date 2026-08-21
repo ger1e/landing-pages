@@ -11,9 +11,10 @@
 <meta property="og:title" content="CIGANY.EXE // ROTUND_OPERATOR">
 <meta property="og:description" content="HUNT. VERIFY. ENRICH. EXPLAIN.">
 <meta name="twitter:card" content="summary_large_image">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'self'; script-src 'self'; img-src 'self' data:; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'self'; script-src 'self'; img-src 'self' data: blob:; connect-src https://api.github.com; object-src 'none'; base-uri 'none'; form-action 'none'">
 <link rel="icon" type="image/svg+xml" href="assets/radar.svg">
 <link rel="stylesheet" href="assets/site.css">
+<link rel="stylesheet" href="assets/loader.css">
 <title>CIGANY.EXE // ROTUND_OPERATOR</title>
 </head>
 <body>
@@ -26,14 +27,12 @@
 <div class="glitch-band band-c" aria-hidden="true"></div>
 <div class="boot" aria-hidden="true"><span>ROTUND_OPERATOR</span><small>LINKING // 3X SIGNAL</small></div>
 <div class="cursor-ring" id="cursorRing" aria-hidden="true"></div>
-
 <main class="stage" id="stage">
   <header class="topline">
     <span class="status"><i></i> SIGNAL // LIVE</span>
     <span class="status-copy">EXPERIMENTAL LANDING SURFACE</span>
     <a class="repo-link" href="https://github.com/ger1e/landing-pages" aria-label="Open landing-pages repository">SOURCE ↗</a>
   </header>
-
   <section class="hero" aria-labelledby="heroTitle">
     <div class="copy" id="copy">
       <p class="eyebrow">// CIGANY.EXE</p>
@@ -45,22 +44,19 @@
         <span class="latency">MATRIX_RATE // 3.0X</span>
       </div>
     </div>
-
-    <figure class="operator" id="operator">
+    <figure class="operator loading" id="operator" aria-busy="true">
       <div class="operator-backdrop" aria-hidden="true"></div>
-      <img src="assets/rotund-operator-4k.avif" width="3072" height="4096" fetchpriority="high" decoding="async" alt="Very round fluffy tabby cat at a cyber workstation">
+      <img id="operatorImage" width="3072" height="4096" fetchpriority="high" decoding="async" alt="Very round fluffy tabby cat at a cyber workstation">
       <div class="monitor-cast" aria-hidden="true"></div>
       <div class="operator-scan" aria-hidden="true"></div>
       <div class="operator-glitch" aria-hidden="true"></div>
       <figcaption><span>ROTUND_OPERATOR</span><b>ACTIVE</b></figcaption>
     </figure>
   </section>
-
   <footer class="ticker" aria-label="Signal state">
     <span>MODE // HUNT</span><span>VISUAL // CYAN</span><span>RAIN // 3X</span><span>CURSOR // TRIANGLE</span><span>GLITCH // CONTROLLED</span>
   </footer>
 </main>
-
 <script src="assets/site.js" defer></script>
 </body>
 </html>
