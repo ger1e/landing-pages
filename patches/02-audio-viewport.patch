@@ -1,0 +1,45 @@
+--- a/index.html
++++ b/index.html
+@@ -227,7 +230,7 @@
+ const reduceMotion=matchMedia('(prefers-reduced-motion: reduce)');
+ const coarse=matchMedia('(pointer: coarse)');
+ let bootReady=false, followOutput=true, composing=false, history=[], historyIndex=0, soundEnabled=true, theme='cobalt', matrixMode='dense', lastActivity=performance.now();
+-let audioCtx=null, masterGain=null, audioUnlocked=false, spotifyController=null, spotifyState='loading';
++let audioCtx=null, masterGain=null, audioUnlocked=false, spotifyController=null, spotifyState='loading', spotifyWantPlay=true;
+ const sessionStart=performance.now();
+ const commands=['help','whoami','location','work','contact','socials','certs','cv','stack','about','love','cat','root','sudo','su','sudo su','pwd','hostname','uname -a','uptime','ls','ls -la','cat /etc/issue','echo $SHELL','echo $USER','echo $HOME','id','history','date','clear','exit','reboot','shutdown -h now','rm -rf /','man gergo','finger gergo','fortune','coffee','hunt','ioc','kql','ping noncsi','chmod +x','chmod +x gergoilly.hu','matrix','matrix status','matrix normal','matrix dense','matrix off','theme','theme cobalt','theme black','status','music','music status','music on','music off','sound','sound status','sound on','sound off'];
+ const pepe=`⣿⣿⣿⣿⣿⣿⢟⣡⣴⣶⣶⣦⣌⡛⠟⣋⣩⣬⣭⣭⡛⢿⣿⣿⣿⣿\n⣿⣿⣿⣿⠋⢰⣿⣿⠿⣛⣛⣙⣛⠻⢆⢻⣿⠿⠿⠿⣿⡄⠻⣿⣿⣿\n⣿⣿⣿⠃⢠⣿⣿⣶⣿⣿⡿⠿⢟⣛⣒⠐⠲⣶⡶⠿⠶⠶⠦⠄⠙⢿\n⣿⠋⣠⠄⣿⣿⣿⠟⡛⢅⣠⡵⡐⠲⣶⣶⣥⡠⣤⣵⠆⠄⠰⣦⣤⡀\n⠇⣰⣿⣼⣿⣿⣧⣤⡸⢿⣿⡀⠂⠁⣸⣿⣿⣿⣿⣇⠄⠈⢀⣿⣿⠿\n⣰⣿⣿⣿⣿⣿⣿⣿⣷⣤⣈⣙⠶⢾⠭⢉⣁⣴⢯⣭⣵⣶⠾⠓⢀⣴\n⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣉⣤⣴⣾⣿⣿⣦⣄⣤⣤⣄⠄⢿⣿\n⣿⣿⣿⣿⣿⣿⣿⣿⠿⠿⠿⠿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣇⠈⢿\n⣿⣿⣿⣿⣿⣿⡟⣰⣞⣛⡒⢒⠤⠦⢬⣉⣉⣉⣉⣉⣉⣉⡥⠴⠂⢸\n⠻⣿⣿⣿⣿⣏⠻⢌⣉⣉⣩⣉⡛⣛⠒⠶⠶⠶⠶⠶⠶⠶⠶⠂⣸⣿\n⣥⣈⠙⡻⠿⠿⣷⣿⣿⣿⣿⣿⣿⣿⣿⣿⣾⣿⠿⠛⢉⣠⣶⣶⣿⣿\n⣿⣿⣿⣶⣬⣅⣒⣒⡂⠈⠭⠭⠭⠭⠭⢉⣁⣄⡀⢾⣿⣿⣿⣿⣿⣿`;
+@@ -240,8 +243,8 @@
+ function htmlLine(html,cls=''){const d=document.createElement('div');d.className='line '+cls;d.innerHTML=html;body.appendChild(d);scrollEnd();return d}
+ function promptLine(cmd){const d=document.createElement('div');d.className='line';const p=document.createElement('span');p.className='prompt';p.textContent='visitor@gergoilly.hu:~$ ';const c=document.createElement('span');c.className='cmd';c.textContent=cmd;d.append(p,c);body.appendChild(d);scrollEnd();return d}
+ function blank(){line('')}
+-function activity(){lastActivity=performance.now();workstation.classList.remove('machine-idle');terminal.classList.add('activity');matrixEngine.boost=.8;setTimeout(()=>terminal.classList.remove('activity'),170);setTimeout(()=>matrixEngine.boost=Math.max(0,matrixEngine.boost-.45),180);if(Math.random()<.08&&!reduceMotion.matches)triggerCursorFault()}
+-['pointerdown','keydown','touchstart'].forEach(e=>addEventListener(e,activity,{passive:e!=='keydown'}));
++function activity(){lastActivity=performance.now();workstation.classList.remove('machine-idle');terminal.classList.add('activity');matrixEngine.boost=.8;setTimeout(()=>terminal.classList.remove('activity'),170);setTimeout(()=>matrixEngine.boost=Math.max(0,matrixEngine.boost-.45),180);if(Math.random()<.08)triggerCursorFault()}
++['pointerdown','keydown','touchstart'].forEach(e=>addEventListener(e,ev=>{activity();unlockAudio()},{passive:e!=='keydown'}));
+ function createAudioContext(){
+   if(!soundEnabled)return null;
+   try{
+@@ -268,7 +271,7 @@
+ function ensureAudio(){if(!soundEnabled||!audioUnlocked||!audioCtx)return null;return audioCtx}
+ function audioOut(){const ctx=ensureAudio();return ctx&&masterGain?masterGain:null}
+ function tone(hz,gain,dur,type='square',delay=0,endHz=0){if(!soundEnabled)return;const ctx=ensureAudio(),dest=audioOut();if(!ctx||!dest)return;try{const o=ctx.createOscillator(),g=ctx.createGain(),t=ctx.currentTime+delay;o.type=type;o.frequency.setValueAtTime(hz,t);if(endHz&&o.frequency.linearRampToValueAtTime)o.frequency.linearRampToValueAtTime(endHz,t+dur);g.gain.setValueAtTime(Math.max(.0001,gain),t);g.gain.exponentialRampToValueAtTime(.0001,t+dur);o.connect(g).connect(dest);o.start(t);o.stop(t+dur+.008)}catch(e){}}
+-function beep(kind='key'){if(!soundEnabled)return;const map={key:[790,.022,.016,'square'],back:[410,.030,.022,'square'],enter:[185,.034,.042,'square'],tab:[1080,.021,.021,'square'],clear:[540,.024,.052,'square'],error:[220,.022,.090,'sine'],boot:[110,.014,.028,'square']};const [hz,gain,dur,type]=map[kind]||map.key;tone(hz,gain,dur,type)}
++function beep(kind='key'){if(!soundEnabled)return;unlockAudio();const map={key:[790,.022,.016,'square'],back:[410,.030,.022,'square'],enter:[185,.034,.042,'square'],tab:[1080,.021,.021,'square'],clear:[540,.024,.052,'square'],error:[220,.022,.090,'sine'],boot:[110,.014,.028,'square']};const [hz,gain,dur,type]=map[kind]||map.key;const pitch=kind==='key'?.94+Math.random()*.12:.985+Math.random()*.03;const level=kind==='key'?.86+Math.random()*.24:.94+Math.random()*.12;tone(hz*pitch,gain*level,dur,type)}
+ const glitchAudio={last:{},majorUntil:0,gate(kind,ms=80,major=false){const now=performance.now(),prev=this.last[kind]||0;if(now-prev<ms)return false;if(major&&now<this.majorUntil)return false;this.last[kind]=now;if(major)this.majorUntil=now+120;return true},play(kind){if(!soundEnabled)return;switch(kind){case'wordmark':if(!this.gate(kind,220,true))return;tone(1480,.020,.030,'square');tone(910,.016,.044,'square',.022);tone(2260,.010,.026,'triangle',.052);break;case'portrait':if(!this.gate(kind,240,true))return;tone(760,.016,.024,'square');tone(1210,.018,.024,'square',.058);break;case'work':if(!this.gate(kind,300,true))return;tone(155,.020,.085,'sine');tone(1640,.014,.038,'square',.018);break;case'matrix':if(!this.gate(kind,900,false))return;tone(480,.008,.095,'sawtooth',0,1850);break;case'title':if(!this.gate(kind,420,false))return;tone(1720,.008,.024,'square');break;case'clock':if(!this.gate(kind,650,false))return;tone(980,.006,.018,'square');break;case'ibm':if(!this.gate(kind,2000,false))return;tone(2360,.0035,.015,'triangle');break;case'cursor':if(!this.gate(kind,650,false))return;tone(1940,.0028,.010,'square');break;}}};
+ function formatBudapest(){const now=new Date();const parts=new Intl.DateTimeFormat('en-CA',{timeZone:'Europe/Budapest',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false}).formatToParts(now);const o={};for(const p of parts)o[p.type]=p.value;return {date:`${o.year}-${o.month}-${o.day}`,time:`${o.hour}:${o.minute}:${o.second}`}}
+ function updateClocks(){const b=formatBudapest();$('#casDate').textContent=b.date;$('#casTime').textContent=b.time;const s=Math.floor((performance.now()-sessionStart)/1000),h=String(Math.floor(s/3600)).padStart(2,'0'),m=String(Math.floor(s%3600/60)).padStart(2,'0'),ss=String(s%60).padStart(2,'0');$('#sessionClock').textContent=`SESSION:${h}:${m}:${ss}`}
+@@ -303,9 +306,12 @@
+   workstation.classList.toggle('mobile-keyboard',keyboardOpen);
+ }
+ function scheduleViewportRefresh(){
++  const wasKeyboard=mobileKeyboardOpen,oldH=mobileStableHeight,oldW=mobileStableWidth;
+   syncMobileViewport();
+   clearTimeout(resizeTimer);
+-  resizeTimer=setTimeout(()=>{updateDims();matrixEngine.resize()},90);
++  const geometryChanged=Math.abs(oldH-mobileStableHeight)>2||Math.abs(oldW-mobileStableWidth)>2;
++  // Do not reset canvas streams or recalculate terminal geometry while the OS keyboard animates.
++  if(!mobileKeyboardOpen&&(geometryChanged||wasKeyboard))resizeTimer=setTimeout(()=>{updateDims();matrixEngine.resize()},90);
+ }
+ addEventListener('resize',scheduleViewportRefresh,{passive:true});
+ if(window.visualViewport)visualViewport.addEventListener('resize',scheduleViewportRefresh,{passive:true});
