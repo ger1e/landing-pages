@@ -20,29 +20,21 @@ concurrency:
 
 jobs:
   prune-merged:
-    name: Prune or archive stale branches
+    name: Prune stale branches
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - name: Preserve unique tips before branch deletion
+      - name: Delete merged branches and verified build-marker branch
         shell: bash
         env:
           GH_TOKEN: ${{ github.token }}
           REPO: ${{ github.repository }}
           DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
-          HEAD_MESSAGE: ${{ github.event.head_commit.message }}
         run: |
           set -euo pipefail
 
           deleted=0
-          archived=0
           preserved=0
-          archive_unmerged=false
-
-          if [[ "${HEAD_MESSAGE:-}" == *"[archive-stale]"* ]]; then
-            archive_unmerged=true
-            echo "One-time archive mode enabled for stale unmerged branches."
-          fi
 
           while IFS=$'\t' read -r branch protected original_sha; do
             [[ -z "$branch" ]] && continue
@@ -67,35 +59,24 @@ jobs:
                 --jq "[.[] | select(.headRefOid == \"$original_sha\")] | length > 0")
             fi
 
-            archive_this=false
-            if [[ "$ahead" != "0" && "$merged_head" != "true" ]]; then
-              if [[ "$archive_unmerged" != "true" ]]; then
-                echo "PRESERVE unique/unmerged commits ($ahead ahead): $branch"
-                preserved=$((preserved + 1))
-                continue
+            disposable_marker_branch=false
+            if [[ "$branch" == "asset-build" && "$ahead" != "0" && "$merged_head" != "true" ]]; then
+              mapfile -t changed_files < <(gh api "repos/$REPO/compare/$DEFAULT_BRANCH...$branch" --paginate --jq '.files[].filename')
+              if [[ "${#changed_files[@]}" -gt 0 ]]; then
+                disposable_marker_branch=true
+                for file in "${changed_files[@]}"; do
+                  if [[ "$file" != .hero-build/* ]]; then
+                    disposable_marker_branch=false
+                    break
+                  fi
+                done
               fi
-              archive_this=true
             fi
 
-            if [[ "$archive_this" == "true" ]]; then
-              short_sha="${original_sha:0:12}"
-              tag="archive/$branch-$short_sha"
-              existing_sha=$(gh api "repos/$REPO/git/ref/tags/$tag" --jq '.object.sha' 2>/dev/null || true)
-
-              if [[ -z "$existing_sha" ]]; then
-                gh api --method POST "repos/$REPO/git/refs" \
-                  -f ref="refs/tags/$tag" \
-                  -f sha="$original_sha" >/dev/null
-              elif [[ "$existing_sha" != "$original_sha" ]]; then
-                echo "ERROR archive tag collision: $tag"
-                exit 1
-              fi
-
-              tag_sha=$(gh api "repos/$REPO/git/ref/tags/$tag" --jq '.object.sha')
-              if [[ "$tag_sha" != "$original_sha" ]]; then
-                echo "ERROR archive verification failed: $branch"
-                exit 1
-              fi
+            if [[ "$ahead" != "0" && "$merged_head" != "true" && "$disposable_marker_branch" != "true" ]]; then
+              echo "PRESERVE unique/unmerged commits ($ahead ahead): $branch"
+              preserved=$((preserved + 1))
+              continue
             fi
 
             current_sha=$(gh api "repos/$REPO/git/ref/heads/$branch" --jq '.object.sha')
@@ -108,9 +89,8 @@ jobs:
             gh api --method DELETE "repos/$REPO/git/refs/heads/$branch"
             deleted=$((deleted + 1))
 
-            if [[ "$archive_this" == "true" ]]; then
-              echo "ARCHIVED+DELETED $branch -> refs/tags/$tag"
-              archived=$((archived + 1))
+            if [[ "$disposable_marker_branch" == "true" ]]; then
+              echo "DELETED verified build-marker branch: $branch"
             elif [[ "$merged_head" == "true" ]]; then
               echo "DELETED exact head of merged PR: $branch"
             else
@@ -122,5 +102,4 @@ jobs:
           )
 
           echo "Deleted: $deleted"
-          echo "Archived before deletion: $archived"
           echo "Preserved: $preserved"
